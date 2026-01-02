@@ -1,0 +1,95 @@
+{
+  "common": {
+    "appName": "FocusDock",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "logout": "Log Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginWithGitHub": "Continue with GitHub",
+    "checkEmail": "Check your email for the login link"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "githubCommits": "GitHub Commits",
+    "workHours": "Work Hours",
+    "spotify": "Spotify",
+    "last30Days": "Last 30 days",
+    "commits": "commits",
+    "hours": "hours",
+    "minutes": "minutes",
+    "noData": "No data available",
+    "connectGitHub": "Connect GitHub",
+    "connectSpotify": "Connect Spotify",
+    "upgradeForSpotify": "Upgrade to access Spotify features"
+  },
+  "grass": {
+    "commits": "{count} {count, plural, =1 {commit} other {commits}}",
+    "hours": "{count} {count, plural, =1 {hour} other {hours}}",
+    "listeningTime": "{minutes} minutes"
+  },
+  "spotify": {
+    "topArtists": "Top Artists",
+    "playTime": "Play Time",
+    "tracks": "Tracks",
+    "noArtists": "No listening data yet"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "githubSettings": "GitHub Settings",
+    "includeSquashCommits": "Include squash commits",
+    "includeMergeCommits": "Include merge commits",
+    "includeBotCommits": "Include bot commits",
+    "grassColors": "Grass Colors",
+    "commitColor": "Commit Color",
+    "workHourColor": "Work Hour Color",
+    "spotifyColor": "Spotify Color",
+    "display": "Display",
+    "showGitHub": "Show GitHub",
+    "showWorkHours": "Show Work Hours",
+    "showSpotify": "Show Spotify"
+  },
+  "pricing": {
+    "title": "Upgrade Your Experience",
+    "monthly": "Monthly",
+    "lifetime": "Lifetime",
+    "donate": "Donate",
+    "perMonth": "/month",
+    "oneTime": "One-time payment",
+    "customAmount": "Custom amount",
+    "features": {
+      "spotify": "Spotify integration",
+      "artistRankings": "Artist rankings",
+      "advancedAnalytics": "Advanced analytics",
+      "prioritySupport": "Priority support"
+    },
+    "subscribe": "Subscribe",
+    "purchase": "Purchase",
+    "donateNow": "Donate",
+    "thankYou": "Thank you for your support!",
+    "paymentSuccess": "Payment successful"
+  },
+  "focus": {
+    "startFocus": "Start Focus",
+    "stopFocus": "Stop Focus",
+    "focusMode": "Focus Mode",
+    "activeFor": "Active for {duration}",
+    "totalToday": "Total today: {duration}"
+  }
+}

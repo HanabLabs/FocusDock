@@ -1,0 +1,95 @@
+{
+  "common": {
+    "appName": "FocusDock",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる"
+  },
+  "auth": {
+    "login": "ログイン",
+    "signup": "新規登録",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "forgotPassword": "パスワードを忘れた方",
+    "noAccount": "アカウントをお持ちでない方",
+    "hasAccount": "既にアカウントをお持ちの方",
+    "loginWithGitHub": "GitHubで続ける",
+    "checkEmail": "ログインリンクをメールでご確認ください"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "welcome": "おかえりなさい",
+    "githubCommits": "GitHubコミット",
+    "workHours": "作業時間",
+    "spotify": "Spotify",
+    "last30Days": "過去30日間",
+    "commits": "コミット",
+    "hours": "時間",
+    "minutes": "分",
+    "noData": "データがありません",
+    "connectGitHub": "GitHubを連携",
+    "connectSpotify": "Spotifyを連携",
+    "upgradeForSpotify": "Spotify機能を利用するにはアップグレードしてください"
+  },
+  "grass": {
+    "commits": "{count}コミット",
+    "hours": "{count}時間",
+    "listeningTime": "{minutes}分"
+  },
+  "spotify": {
+    "topArtists": "トップアーティスト",
+    "playTime": "再生時間",
+    "tracks": "トラック",
+    "noArtists": "まだ再生データがありません"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "theme": "テーマ",
+    "githubSettings": "GitHub設定",
+    "includeSquashCommits": "スカッシュコミットを含める",
+    "includeMergeCommits": "マージコミットを含める",
+    "includeBotCommits": "ボットコミットを含める",
+    "grassColors": "草グラフの色",
+    "commitColor": "コミットの色",
+    "workHourColor": "作業時間の色",
+    "spotifyColor": "Spotifyの色",
+    "display": "表示",
+    "showGitHub": "GitHubを表示",
+    "showWorkHours": "作業時間を表示",
+    "showSpotify": "Spotifyを表示"
+  },
+  "pricing": {
+    "title": "プランをアップグレード",
+    "monthly": "月額プラン",
+    "lifetime": "買い切り",
+    "donate": "寄付",
+    "perMonth": "/月",
+    "oneTime": "一回払い",
+    "customAmount": "金額を指定",
+    "features": {
+      "spotify": "Spotify連携",
+      "artistRankings": "アーティストランキング",
+      "advancedAnalytics": "高度な分析",
+      "prioritySupport": "優先サポート"
+    },
+    "subscribe": "購読する",
+    "purchase": "購入する",
+    "donateNow": "寄付する",
+    "thankYou": "ご支援ありがとうございます!",
+    "paymentSuccess": "お支払いが完了しました"
+  },
+  "focus": {
+    "startFocus": "フォーカス開始",
+    "stopFocus": "フォーカス停止",
+    "focusMode": "フォーカスモード",
+    "activeFor": "稼働時間: {duration}",
+    "totalToday": "今日の合計: {duration}"
+  }
+}
