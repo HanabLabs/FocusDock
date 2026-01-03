@@ -86,10 +86,13 @@
     "paymentSuccess": "Payment successful"
   },
   "focus": {
-    "startFocus": "Start Focus",
-    "stopFocus": "Stop Focus",
     "focusMode": "Focus Mode",
-    "activeFor": "Active for {duration}",
+    "startWork": "Start Work",
+    "pauseWork": "Pause",
+    "resumeWork": "Resume",
+    "endWork": "End Work",
+    "statusActive": "Working",
+    "statusPaused": "Paused",
     "totalToday": "Total today: {duration}"
   }
 }

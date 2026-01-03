@@ -86,10 +86,13 @@
     "paymentSuccess": "お支払いが完了しました"
   },
   "focus": {
-    "startFocus": "フォーカス開始",
-    "stopFocus": "フォーカス停止",
     "focusMode": "フォーカスモード",
-    "activeFor": "稼働時間: {duration}",
+    "startWork": "作業開始",
+    "pauseWork": "一時休憩",
+    "resumeWork": "作業再開",
+    "endWork": "作業終了",
+    "statusActive": "作業中",
+    "statusPaused": "休憩中",
     "totalToday": "今日の合計: {duration}"
   }
 }

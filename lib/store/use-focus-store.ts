@@ -1,62 +1,81 @@
 import { create } from 'zustand';
 
+type FocusState = 'idle' | 'active' | 'paused';
+
 interface FocusStore {
-  isFocusing: boolean;
-  focusStartTime: number | null;
+  state: FocusState;
+  sessionStartTime: number | null;
+  pauseStartTime: number | null;
+  totalPausedTime: number;
   totalFocusToday: number;
-  lastActivityTime: number;
 
   startFocus: () => void;
-  stopFocus: () => void;
-  updateActivity: () => void;
+  pauseFocus: () => void;
+  resumeFocus: () => void;
+  endFocus: () => void;
   resetDailyFocus: () => void;
 }
 
-const INACTIVITY_THRESHOLD = 5 * 60 * 1000; // 5 minutes
-
 export const useFocusStore = create<FocusStore>((set, get) => ({
-  isFocusing: false,
-  focusStartTime: null,
+  state: 'idle',
+  sessionStartTime: null,
+  pauseStartTime: null,
+  totalPausedTime: 0,
   totalFocusToday: 0,
-  lastActivityTime: Date.now(),
 
   startFocus: () => {
     set({
-      isFocusing: true,
-      focusStartTime: Date.now(),
-      lastActivityTime: Date.now(),
+      state: 'active',
+      sessionStartTime: Date.now(),
+      pauseStartTime: null,
+      totalPausedTime: 0,
     });
   },
 
-  stopFocus: () => {
-    const { focusStartTime, totalFocusToday } = get();
-    if (focusStartTime) {
-      const sessionDuration = Date.now() - focusStartTime;
+  pauseFocus: () => {
+    const { state } = get();
+    if (state === 'active') {
       set({
-        isFocusing: false,
-        focusStartTime: null,
-        totalFocusToday: totalFocusToday + sessionDuration,
+        state: 'paused',
+        pauseStartTime: Date.now(),
       });
     }
   },
 
-  updateActivity: () => {
-    const { isFocusing, lastActivityTime, focusStartTime, totalFocusToday } = get();
-    const now = Date.now();
+  resumeFocus: () => {
+    const { state, pauseStartTime, totalPausedTime } = get();
+    if (state === 'paused' && pauseStartTime) {
+      const pauseDuration = Date.now() - pauseStartTime;
+      set({
+        state: 'active',
+        pauseStartTime: null,
+        totalPausedTime: totalPausedTime + pauseDuration,
+      });
+    }
+  },
 
-    if (isFocusing && focusStartTime) {
-      // Check for inactivity
-      if (now - lastActivityTime > INACTIVITY_THRESHOLD) {
-        // Stop focus due to inactivity
-        const sessionDuration = lastActivityTime - focusStartTime;
-        set({
-          isFocusing: false,
-          focusStartTime: null,
-          totalFocusToday: totalFocusToday + sessionDuration,
-        });
-      } else {
-        set({ lastActivityTime: now });
+  endFocus: () => {
+    const { state, sessionStartTime, totalPausedTime, totalFocusToday, pauseStartTime } = get();
+
+    if ((state === 'active' || state === 'paused') && sessionStartTime) {
+      let totalSessionTime = Date.now() - sessionStartTime;
+      let finalPausedTime = totalPausedTime;
+
+      // If still paused when ending, add current pause duration
+      if (state === 'paused' && pauseStartTime) {
+        finalPausedTime += Date.now() - pauseStartTime;
       }
+
+      // Net work time = total session time - total paused time
+      const netWorkTime = totalSessionTime - finalPausedTime;
+
+      set({
+        state: 'idle',
+        sessionStartTime: null,
+        pauseStartTime: null,
+        totalPausedTime: 0,
+        totalFocusToday: totalFocusToday + netWorkTime,
+      });
     }
   },
 
