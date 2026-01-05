@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import Link from 'next/link';
 import { UserProfile } from '@/lib/types/database.types';
+import { createClient } from '@/lib/supabase/client';
 
 interface GitHubIntegrationClientProps {
   profile: UserProfile | null;
@@ -12,13 +13,24 @@ interface GitHubIntegrationClientProps {
 export function GitHubIntegrationClient({ profile }: GitHubIntegrationClientProps) {
   const { t } = useI18n();
   const isConnected = profile?.github_connected || false;
+  const supabase = createClient();
 
   const handleConnect = async () => {
     try {
-      const response = await fetch('/api/github/auth-url');
-      const data = await response.json();
-      if (data.authUrl) {
-        window.location.href = data.authUrl;
+      // Use Supabase GitHub OAuth
+      // After OAuth, user will be redirected to /auth/callback
+      // Then we'll check in the callback if they came from integrations page
+      // and update their profile accordingly
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?from=github-integration`,
+          scopes: 'repo',
+        },
+      });
+      
+      if (error) {
+        console.error('Failed to initiate GitHub OAuth:', error);
       }
     } catch (error) {
       console.error('Failed to get GitHub auth URL:', error);
