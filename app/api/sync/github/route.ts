@@ -131,39 +131,6 @@ export async function POST(request: NextRequest) {
 
         const commits = allCommits;
 
-        // Collect all commits with messages for recent commits table
-        const commitsWithMessages: Array<{
-          repository: string;
-          message: string;
-          date: string;
-        }> = [];
-        
-        for (const commit of commits) {
-          const commitDate = new Date(commit.commit.author.date);
-          
-          // Skip if outside date range
-          if (commitDate < startDate || commitDate > endDate) {
-            continue;
-          }
-
-          // Filter by author: match GitHub username
-          // If commit.author.login is null/undefined, include it (likely user's commit with incomplete author info)
-          const commitAuthorLogin = commit.author?.login?.toLowerCase();
-          const githubUsername = profile.github_username?.toLowerCase();
-          
-          // Only skip if author login exists and doesn't match GitHub username
-          // If author login is null/undefined, include the commit (user's commit)
-          if (commitAuthorLogin && githubUsername && commitAuthorLogin !== githubUsername) {
-            continue;
-          }
-
-          commitsWithMessages.push({
-            repository: repo.name,
-            message: commit.commit.message.split('\n')[0], // First line of commit message
-            date: commit.commit.author.date,
-          });
-        }
-
         // Process commits and group by date
         const commitsByDate = new Map<string, {
           count: number;
