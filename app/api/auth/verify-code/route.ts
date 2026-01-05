@@ -39,8 +39,20 @@ export async function POST(request: NextRequest) {
     // Decrypt password
     const crypto = require('crypto');
     const algorithm = 'aes-256-cbc';
-    const encryptionKey = process.env.ENCRYPTION_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 64) || '';
-    const key = Buffer.from(encryptionKey.slice(0, 64), 'hex').slice(0, 32); // Ensure 32 bytes for AES-256
+    
+    // Generate decryption key - must match the encryption key generation
+    let key: Buffer;
+    if (process.env.ENCRYPTION_KEY) {
+      try {
+        key = Buffer.from(process.env.ENCRYPTION_KEY, 'hex').slice(0, 32);
+      } catch {
+        key = crypto.createHash('sha256').update(process.env.ENCRYPTION_KEY).digest().slice(0, 32);
+      }
+    } else {
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+      key = crypto.createHash('sha256').update(serviceKey).digest().slice(0, 32);
+    }
+    
     const [ivHex, encryptedPassword] = verificationData.password_hash.split(':');
     const iv = Buffer.from(ivHex, 'hex');
     const decipher = crypto.createDecipheriv(algorithm, key, iv);

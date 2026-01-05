@@ -1,5 +1,5 @@
 -- Create verification_codes table for email verification codes
-CREATE TABLE IF NOT EXISTS verification_codes (
+CREATE TABLE IF NOT EXISTS public.verification_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL,
   password_hash TEXT NOT NULL,
@@ -8,6 +8,16 @@ CREATE TABLE IF NOT EXISTS verification_codes (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   used BOOLEAN DEFAULT FALSE
 );
+
+-- Enable Row Level Security (but allow service role to access)
+ALTER TABLE public.verification_codes ENABLE ROW LEVEL SECURITY;
+
+-- Allow service role to access verification codes (needed for API routes)
+CREATE POLICY "Service role can manage verification codes"
+  ON public.verification_codes
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
 
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_verification_codes_email_code ON verification_codes(email, code);
