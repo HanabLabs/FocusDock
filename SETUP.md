@@ -26,24 +26,37 @@ This guide will walk you through setting up FocusDock for production deployment.
 4. Configure email templates (optional)
 5. Enable GitHub OAuth:
    - Add GitHub as a provider
-   - Enter your GitHub OAuth app credentials
-   - Add callback URL: `https://yourdomain.com/en/auth/callback` (or `/ja/auth/callback` for Japanese)
+   - Enter your GitHub OAuth app credentials (for login/signup - see below)
+   - Add callback URL: `https://yourdomain.com/auth/callback`
 
-## 2. GitHub OAuth App
+## 2. GitHub OAuth Apps
 
-### Create OAuth App
+You need to create **two separate GitHub OAuth Apps**:
+
+### App 1: Login/Signup (used by Supabase)
 1. Go to GitHub Settings > Developer settings > OAuth Apps
 2. Click "New OAuth App"
 3. Fill in details:
-   - Application name: FocusDock
+   - Application name: FocusDock (Login)
+   - Homepage URL: `https://yourdomain.com`
+   - Authorization callback URL: `https://yourdomain.com/auth/callback`
+4. Save Client ID and Client Secret
+5. Use these credentials in Supabase Authentication > Providers > GitHub
+
+### App 2: Integration (for GitHub integration feature)
+1. Go to GitHub Settings > Developer settings > OAuth Apps
+2. Click "New OAuth App"
+3. Fill in details:
+   - Application name: FocusDock (Integration)
    - Homepage URL: `https://yourdomain.com`
    - Authorization callback URL: `https://yourdomain.com/integrations/github/callback`
 4. Save Client ID and Client Secret
+5. Set these as environment variables: `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`
 
 ### Permissions
-The app requests:
+Both apps request:
 - `read:user` - Read user profile
-- `repo` - Access repositories for commit data
+- `repo` - Access repositories for commit data (required for integration app)
 
 ## 3. Spotify OAuth App
 
