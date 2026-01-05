@@ -37,7 +37,7 @@ export function PaymentForm({ planType, amount }: PaymentFormProps) {
       const { error: stripeError } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/payment/success`,
+          return_url: `${window.location.origin}/dashboard`,
         },
       });
 
