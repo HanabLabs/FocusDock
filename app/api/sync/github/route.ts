@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
         let hasMore = true;
 
         while (hasMore) {
-          // Use author parameter for primary filtering, but also include commits where author is null
-          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&author=${profile.github_username}&per_page=${perPage}&page=${page}`;
+          // Fetch all commits (author parameter can miss some commits, filter client-side instead)
+          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&per_page=${perPage}&page=${page}`;
           
           const commitsResponse = await fetch(commitsUrl, {
             headers: {
@@ -138,6 +138,17 @@ export async function POST(request: NextRequest) {
 
           // Skip if outside date range
           if (commitDate < startDate || commitDate > endDate) {
+            continue;
+          }
+
+          // Filter by author: match GitHub username
+          // If commit.author.login is null/undefined, include the commit (user's commit with incomplete author info)
+          const commitAuthorLogin = commit.author?.login?.toLowerCase();
+          const githubUsername = profile.github_username?.toLowerCase();
+          
+          // Only exclude commits where author login exists and doesn't match GitHub username
+          // Include commits where author login is null/undefined (likely user's commits)
+          if (commitAuthorLogin && githubUsername && commitAuthorLogin !== githubUsername) {
             continue;
           }
 
