@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
 
     const repos = await reposResponse.json();
     
-    // Calculate date range (last 50 days)
+    // Calculate date range (last 1 year to get historical data)
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 50);
+    startDate.setFullYear(startDate.getFullYear() - 1);
     
     const commitsToInsert: Array<{
       user_id: string;
