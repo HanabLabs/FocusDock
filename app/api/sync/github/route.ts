@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
         let hasMore = true;
 
         while (hasMore) {
-          // Fetch all commits (author filter can miss commits, we'll filter client-side)
-          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&per_page=${perPage}&page=${page}`;
+          // Use author parameter for primary filtering, but also include commits where author is null
+          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&author=${profile.github_username}&per_page=${perPage}&page=${page}`;
           
           const commitsResponse = await fetch(commitsUrl, {
             headers: {
@@ -141,17 +141,6 @@ export async function POST(request: NextRequest) {
             continue;
           }
 
-          // Filter by author: match GitHub username
-          // GitHub API author parameter can miss commits, so we filter client-side
-          // If commit.author.login is null, include it (likely user's commit with incomplete author info)
-          const commitAuthorLogin = commit.author?.login?.toLowerCase();
-          const githubUsername = profile.github_username?.toLowerCase();
-          
-          // Only skip if author login exists and doesn't match GitHub username
-          // If author login is null/undefined, include the commit (user's commit)
-          if (commitAuthorLogin && githubUsername && commitAuthorLogin !== githubUsername) {
-            continue;
-          }
 
           const message = commit.commit.message.toLowerCase();
           const isSquash = message.includes('squash') || message.includes('fixup');
