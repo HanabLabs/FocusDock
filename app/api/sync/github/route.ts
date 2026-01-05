@@ -229,14 +229,20 @@ export async function POST(request: NextRequest) {
 
     // Process and save recent commits (latest 5 across all repositories)
     // Sort all commits by date (most recent first) and take latest 5
+    console.log(`Total commits collected for recent commits: ${allCommitsWithMessages.length}`);
     allCommitsWithMessages.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const recentCommits = allCommitsWithMessages.slice(0, 5);
+    console.log(`Recent commits to insert: ${recentCommits.length}`);
 
     // Clear existing recent commits for this user and insert new ones
-    await supabase
+    const { error: deleteError } = await supabase
       .from('github_recent_commits')
       .delete()
       .eq('user_id', user.id);
+
+    if (deleteError) {
+      console.error('Failed to delete existing recent commits:', deleteError);
+    }
 
     if (recentCommits.length > 0) {
       const recentCommitsToInsert = recentCommits.map((commit) => ({
@@ -246,14 +252,20 @@ export async function POST(request: NextRequest) {
         date: commit.date,
       }));
 
-      const { error: recentCommitsError } = await supabase
+      console.log('Inserting recent commits:', recentCommitsToInsert);
+      const { error: recentCommitsError, data: insertedData } = await supabase
         .from('github_recent_commits')
-        .insert(recentCommitsToInsert);
+        .insert(recentCommitsToInsert)
+        .select();
 
       if (recentCommitsError) {
         console.error('Failed to insert recent commits:', recentCommitsError);
-        // Don't throw error, just log it
+        throw new Error(`Failed to insert recent commits: ${recentCommitsError.message}`);
+      } else {
+        console.log('Successfully inserted recent commits:', insertedData);
       }
+    } else {
+      console.log('No recent commits to insert');
     }
 
     return NextResponse.json({
