@@ -8,23 +8,29 @@ interface SendVerificationEmailParams {
 }
 
 export async function sendVerificationEmail({ to, code }: SendVerificationEmailParams): Promise<void> {
-  // In development, just log the code (no email sent)
+  const resendApiKey = process.env.RESEND_API_KEY;
+  
+  // In development, log the code even if RESEND_API_KEY is set
   if (process.env.NODE_ENV === 'development') {
     console.log('='.repeat(50));
     console.log('VERIFICATION CODE EMAIL (Development Mode)');
     console.log('='.repeat(50));
     console.log(`To: ${to}`);
     console.log(`Code: ${code}`);
+    if (!resendApiKey) {
+      console.log('RESEND_API_KEY not set - email will not be sent');
+    }
     console.log('='.repeat(50));
-    return;
+    
+    // In development, don't send email even if API key is set (to avoid sending test emails)
+    if (!process.env.ALLOW_EMAIL_IN_DEV) {
+      return;
+    }
   }
-
-  // In production, use Resend to send email
-  const resendApiKey = process.env.RESEND_API_KEY;
   
   if (!resendApiKey) {
     console.warn('RESEND_API_KEY not set. Email not sent. Code:', code);
-    return;
+    throw new Error('RESEND_API_KEY environment variable is not set');
   }
 
   try {
@@ -35,7 +41,7 @@ export async function sendVerificationEmail({ to, code }: SendVerificationEmailP
         'Authorization': `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM_EMAIL || 'FocusDock <noreply@hanablabs.info>',
+        from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
         to: [to],
         subject: 'FocusDock Verification Code',
         html: `
@@ -66,17 +72,36 @@ export async function sendVerificationEmail({ to, code }: SendVerificationEmailP
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Failed to send email via Resend:', errorData);
-      throw new Error(`Resend API error: ${response.status}`);
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { message: errorText };
+      }
+      
+      console.error('Failed to send email via Resend:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+      });
+      
+      throw new Error(`Resend API error (${response.status}): ${errorData.message || errorText}`);
     }
 
     const data = await response.json();
-    console.log('Email sent successfully via Resend:', data.id);
-  } catch (error) {
-    console.error('Error sending email:', error);
-    // Don't throw - log the code so it can be retrieved manually if needed
-    console.log('Verification code (fallback):', code);
+    console.log('Email sent successfully via Resend:', {
+      emailId: data.id,
+      to: to,
+    });
+  } catch (error: any) {
+    console.error('Error sending verification email:', {
+      error: error.message,
+      stack: error.stack,
+      to: to,
+    });
+    // Re-throw the error so the calling code can handle it
+    throw error;
   }
 }
 

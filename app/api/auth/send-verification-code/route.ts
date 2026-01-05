@@ -93,9 +93,16 @@ export async function POST(request: NextRequest) {
         to: email,
         code: verificationCode,
       });
-    } catch (error) {
-      console.error('Error sending verification email:', error);
+      console.log('Verification email sent successfully to:', email);
+    } catch (error: any) {
+      console.error('Error sending verification email:', {
+        error: error.message,
+        email: email,
+      });
+      // Log the code so it can be retrieved manually if needed
+      console.log('Verification code (fallback - email failed):', verificationCode);
       // Continue even if email fails - code is stored in database
+      // In production, you might want to return an error here, but for now we'll allow the request to succeed
     }
 
     return NextResponse.json({ success: true });
