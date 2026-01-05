@@ -98,6 +98,18 @@ CREATE POLICY "Users can insert their own commits"
   ON public.github_commits FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+CREATE POLICY "Users can view their own recent commits"
+  ON public.github_recent_commits FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own recent commits"
+  ON public.github_recent_commits FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own recent commits"
+  ON public.github_recent_commits FOR DELETE
+  USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can view their own work sessions"
   ON public.work_sessions FOR SELECT
   USING (auth.uid() = user_id);
