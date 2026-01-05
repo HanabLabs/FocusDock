@@ -88,7 +88,8 @@ export async function POST(request: NextRequest) {
         let hasMore = true;
 
         while (hasMore) {
-          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&author=${profile.github_username}&per_page=${perPage}&page=${page}`;
+          // Fetch all commits (author filter can miss commits, we'll filter client-side)
+          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&per_page=${perPage}&page=${page}`;
           
           const commitsResponse = await fetch(commitsUrl, {
             headers: {
@@ -137,6 +138,16 @@ export async function POST(request: NextRequest) {
 
           // Skip if outside date range
           if (commitDate < startDate || commitDate > endDate) {
+            continue;
+          }
+
+          // Filter by author: match GitHub username or author login
+          // GitHub API author parameter can miss commits, so we filter client-side
+          const commitAuthorLogin = commit.author?.login?.toLowerCase();
+          const githubUsername = profile.github_username?.toLowerCase();
+          
+          // Skip if author doesn't match GitHub username
+          if (commitAuthorLogin && githubUsername && commitAuthorLogin !== githubUsername) {
             continue;
           }
 
