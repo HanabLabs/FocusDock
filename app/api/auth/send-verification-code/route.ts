@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -87,14 +88,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Send verification code via email
-    // TODO: Implement email sending service (e.g., Resend, SendGrid, etc.)
-    // For now, we'll log the code in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Verification code for', email, ':', verificationCode);
+    try {
+      await sendVerificationEmail({
+        to: email,
+        code: verificationCode,
+      });
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      // Continue even if email fails - code is stored in database
     }
-
-    // In production, send email here
-    // await sendVerificationEmail(email, verificationCode);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
