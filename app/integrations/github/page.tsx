@@ -13,7 +13,7 @@ export default async function GitHubIntegrationPage() {
   // Fetch user profile
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('github_connected, github_username')
+    .select('*')
     .eq('id', user.id)
     .single();
 
