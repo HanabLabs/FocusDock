@@ -14,7 +14,7 @@ interface FocusStore {
   startFocus: () => void;
   pauseFocus: () => void;
   resumeFocus: () => void;
-  endFocus: () => void;
+  endFocus: () => Promise<void>;
   resetDailyFocus: () => void;
   getCurrentWorkTime: () => number; // Get current work time including active session
 }
@@ -113,7 +113,7 @@ export const useFocusStore = create<FocusStore>()(
         }
       },
 
-      endFocus: () => {
+      endFocus: async () => {
         const { state, sessionStartTime, totalPausedTime, totalFocusToday, pauseStartTime, lastDate } = get();
         const today = getTodayDateString();
 
@@ -138,6 +138,24 @@ export const useFocusStore = create<FocusStore>()(
             const timeBeforeMidnight = Math.max(0, midnight - sessionStartTime - (state === 'paused' ? totalPausedTime + (pauseStartTime ? Date.now() - pauseStartTime : 0) : totalPausedTime));
             const timeAfterMidnight = Math.max(0, Date.now() - midnight - (state === 'paused' && pauseStartTime ? Date.now() - pauseStartTime : 0));
 
+            // Save work session for previous date (before midnight)
+            if (timeBeforeMidnight > 0) {
+              const durationMinutes = timeBeforeMidnight / (1000 * 60);
+              try {
+                await fetch('/api/save-work-session', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    startedAt: sessionStartTime,
+                    endedAt: midnight,
+                    durationMinutes,
+                  }),
+                });
+              } catch (error) {
+                console.error('Failed to save work session:', error);
+              }
+            }
+
             // Only count time after midnight for today
             set({
               state: 'idle',
@@ -148,6 +166,24 @@ export const useFocusStore = create<FocusStore>()(
               lastDate: today,
             });
             return;
+          }
+
+          // Save work session to database
+          if (netWorkTime > 0) {
+            const durationMinutes = netWorkTime / (1000 * 60);
+            try {
+              await fetch('/api/save-work-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  startedAt: sessionStartTime,
+                  endedAt: Date.now(),
+                  durationMinutes,
+                }),
+              });
+            } catch (error) {
+              console.error('Failed to save work session:', error);
+            }
           }
 
           // Reset totalFocusToday if date has changed
