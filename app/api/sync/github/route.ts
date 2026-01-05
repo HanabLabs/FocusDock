@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Fetch commits from each repository
     for (const repo of repos) {
       try {
-        // Fetch commits with pagination to get all commits from the last year
+        // Fetch commits with pagination to get all commits from the last 50 days
         let allCommits: GitHubCommit[] = [];
         let page = 1;
         const perPage = 100;
