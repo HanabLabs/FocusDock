@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import { loadStripe } from '@stripe/stripe-js';
@@ -13,7 +13,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 type PlanType = 'monthly' | 'lifetime' | 'donate';
 
-export default function PricingPage() {
+function PricingContent() {
   const { t } = useI18n();
   const searchParams = useSearchParams();
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
@@ -324,5 +324,17 @@ export default function PricingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    }>
+      <PricingContent />
+    </Suspense>
   );
 }
