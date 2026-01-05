@@ -52,6 +52,20 @@ export function DashboardClient({
     setIsMounted(true);
   }, []);
 
+  // Handle GitHub connection success - reload page to fetch new data
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const githubConnected = params.get('github');
+      if (githubConnected === 'connected') {
+        // Remove query parameter and reload to fetch fresh data from server
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+        window.location.reload();
+      }
+    }
+  }, []);
+
   // Process GitHub commits data (memoized)
   const githubData = useMemo(() => {
     return githubCommits
