@@ -236,3 +236,4 @@ For issues or questions, please open a GitHub issue.
 ---
 
 Built with ❤️ by developers, for developers.
+# FocusDock
