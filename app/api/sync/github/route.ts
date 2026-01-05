@@ -159,6 +159,12 @@ export async function POST(request: NextRequest) {
             continue;
           }
 
+          // Collect commit for recent commits table
+          allCommitsWithMessages.push({
+            repository: repo.name,
+            message: commit.commit.message.split('\n')[0], // First line of commit message
+            date: commit.commit.author.date,
+          });
 
           const message = commit.commit.message.toLowerCase();
           const isSquash = message.includes('squash') || message.includes('fixup');
