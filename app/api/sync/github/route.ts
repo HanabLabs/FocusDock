@@ -141,12 +141,14 @@ export async function POST(request: NextRequest) {
             continue;
           }
 
-          // Filter by author: match GitHub username or author login
+          // Filter by author: match GitHub username
           // GitHub API author parameter can miss commits, so we filter client-side
+          // If commit.author.login is null, include it (likely user's commit with incomplete author info)
           const commitAuthorLogin = commit.author?.login?.toLowerCase();
           const githubUsername = profile.github_username?.toLowerCase();
           
-          // Skip if author doesn't match GitHub username
+          // Only skip if author login exists and doesn't match GitHub username
+          // If author login is null/undefined, include the commit (user's commit)
           if (commitAuthorLogin && githubUsername && commitAuthorLogin !== githubUsername) {
             continue;
           }
