@@ -221,6 +221,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Process and save recent commits (latest 5 across all repositories)
+    // Sort all commits by date (most recent first) and take latest 5
+    allCommitsWithMessages.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const recentCommits = allCommitsWithMessages.slice(0, 5);
+
+    // Clear existing recent commits for this user and insert new ones
+    await supabase
+      .from('github_recent_commits')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (recentCommits.length > 0) {
+      const recentCommitsToInsert = recentCommits.map((commit) => ({
+        user_id: user.id,
+        repository: commit.repository,
+        message: commit.message,
+        date: commit.date,
+      }));
+
+      const { error: recentCommitsError } = await supabase
+        .from('github_recent_commits')
+        .insert(recentCommitsToInsert);
+
+      if (recentCommitsError) {
+        console.error('Failed to insert recent commits:', recentCommitsError);
+        // Don't throw error, just log it
+      }
+    }
+
     return NextResponse.json({
       success: true,
       commitsSynced: commitsToInsert.length,
