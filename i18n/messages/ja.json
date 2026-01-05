@@ -20,7 +20,10 @@
     "noAccount": "アカウントをお持ちでない方",
     "hasAccount": "既にアカウントをお持ちの方",
     "loginWithGitHub": "GitHubで続ける",
-    "checkEmail": "ログインリンクをメールでご確認ください"
+    "checkEmail": "ログインリンクをメールでご確認ください",
+    "common": {
+      "loading": "読み込み中..."
+    }
   },
   "dashboard": {
     "title": "ダッシュボード",
@@ -56,14 +59,16 @@
     "includeSquashCommits": "スカッシュコミットを含める",
     "includeMergeCommits": "マージコミットを含める",
     "includeBotCommits": "ボットコミットを含める",
-    "grassColors": "草グラフの色",
+    "grassColors": "グラフの色",
     "commitColor": "コミットの色",
     "workHourColor": "作業時間の色",
     "spotifyColor": "Spotifyの色",
     "display": "表示",
     "showGitHub": "GitHubを表示",
     "showWorkHours": "作業時間を表示",
-    "showSpotify": "Spotifyを表示"
+    "showSpotify": "Spotifyを表示",
+    "upgrade": "アップグレード",
+    "donate": "寄付"
   },
   "pricing": {
     "title": "プランをアップグレード",

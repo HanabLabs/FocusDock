@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+type BlockUnit = '15min' | '30min' | '1hour';
+
 interface SettingsStore {
   // GitHub settings
   includeSquashCommits: boolean;
@@ -17,10 +19,15 @@ interface SettingsStore {
   showWorkHours: boolean;
   showSpotify: boolean;
 
+  // Block unit settings
+  workHoursBlockUnit: BlockUnit;
+  spotifyBlockUnit: BlockUnit;
+
   // Actions
   setGitHubSetting: (key: string, value: boolean) => void;
   setGrassColor: (key: string, value: string) => void;
   setDisplaySetting: (key: string, value: boolean) => void;
+  setBlockUnit: (key: 'workHoursBlockUnit' | 'spotifyBlockUnit', value: BlockUnit) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -39,6 +46,9 @@ export const useSettingsStore = create<SettingsStore>()(
       showWorkHours: true,
       showSpotify: true,
 
+      workHoursBlockUnit: '1hour',
+      spotifyBlockUnit: '1hour',
+
       setGitHubSetting: (key, value) =>
         set((state) => ({ ...state, [key]: value })),
 
@@ -46,6 +56,9 @@ export const useSettingsStore = create<SettingsStore>()(
         set((state) => ({ ...state, [key]: value })),
 
       setDisplaySetting: (key, value) =>
+        set((state) => ({ ...state, [key]: value })),
+
+      setBlockUnit: (key, value) =>
         set((state) => ({ ...state, [key]: value })),
     }),
     {

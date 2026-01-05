@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useI18n } from '@/lib/i18n';
 
 interface Artist {
   name: string;
@@ -22,12 +22,12 @@ function formatPlayTime(ms: number) {
 }
 
 export function SpotifyArtists({ artists, isPaid }: SpotifyArtistsProps) {
-  const t = useTranslations('spotify');
+  const { t } = useI18n();
 
   if (!isPaid) {
     return (
       <div className="glass-card p-6">
-        <h3 className="text-lg font-semibold mb-4">{t('topArtists')}</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('spotify.topArtists')}</h3>
         <div className="text-center py-8">
           <p className="text-gray-400 mb-4">
             Unlock Spotify features with a subscription
@@ -46,8 +46,8 @@ export function SpotifyArtists({ artists, isPaid }: SpotifyArtistsProps) {
   if (artists.length === 0) {
     return (
       <div className="glass-card p-6">
-        <h3 className="text-lg font-semibold mb-4">{t('topArtists')}</h3>
-        <p className="text-gray-400 text-center py-8">{t('noArtists')}</p>
+        <h3 className="text-lg font-semibold mb-4">{t('spotify.topArtists')}</h3>
+        <p className="text-gray-400 text-center py-8">{t('spotify.noArtists')}</p>
       </div>
     );
   }
@@ -55,7 +55,7 @@ export function SpotifyArtists({ artists, isPaid }: SpotifyArtistsProps) {
   return (
     <div className="glass-card p-6">
       <h3 className="text-lg font-semibold mb-4">
-        {t('topArtists')} <span className="text-sm text-gray-400">({t('dashboard.last30Days')})</span>
+        {t('spotify.topArtists')} <span className="text-sm text-gray-400">({t('dashboard.last30Days')})</span>
       </h3>
 
       <div className="space-y-3">
@@ -90,7 +90,7 @@ export function SpotifyArtists({ artists, isPaid }: SpotifyArtistsProps) {
                   <div>
                     <p className="font-semibold">{artist.name}</p>
                     <p className="text-xs text-gray-400">
-                      {artist.trackCount} {t('tracks')}
+                      {artist.trackCount} {t('spotify.tracks')}
                     </p>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ export function SpotifyArtists({ artists, isPaid }: SpotifyArtistsProps) {
                   <p className="font-mono font-semibold">
                     {formatPlayTime(artist.playTimeMs)}
                   </p>
-                  <p className="text-xs text-gray-400">{t('playTime')}</p>
+                  <p className="text-xs text-gray-400">{t('spotify.playTime')}</p>
                 </div>
               </div>
 

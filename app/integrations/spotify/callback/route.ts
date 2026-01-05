@@ -62,6 +62,15 @@ export async function GET(request: NextRequest) {
       })
       .eq('id', user.id);
 
+    // Trigger sync in background (don't wait for it)
+    const syncUrl = new URL('/api/sync/spotify', request.nextUrl.origin);
+    fetch(syncUrl.toString(), {
+      method: 'POST',
+      headers: {
+        Cookie: request.headers.get('Cookie') || '',
+      },
+    }).catch(err => console.error('Failed to trigger Spotify sync:', err));
+
     return NextResponse.redirect(new URL('/dashboard?spotify=connected', request.url));
   } catch (error) {
     console.error('Spotify OAuth error:', error);

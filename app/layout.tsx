@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { I18nProvider } from '@/lib/i18n';
+import { HideDevIndicator } from '@/components/hide-dev-indicator';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -8,20 +8,16 @@ export const metadata: Metadata = {
   description: 'Visualize your development journey with GitHub, work hours, and Spotify integration',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
+}) {
   return (
-    <html lang={locale} className="dark">
+    <html lang="en" className="dark">
       <body className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900">
-        <NextIntlClientProvider messages={messages}>
-          {children}
-        </NextIntlClientProvider>
+        <I18nProvider>{children}</I18nProvider>
+        <HideDevIndicator />
       </body>
     </html>
   );

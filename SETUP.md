@@ -18,11 +18,16 @@ This guide will walk you through setting up FocusDock for production deployment.
 ### Configure Authentication
 1. Go to Authentication > Providers
 2. Enable Email provider
-3. Configure email templates (optional)
-4. Enable GitHub OAuth:
+3. **For Development**: 
+   - Go to Authentication > Settings > Email Auth
+   - Enable "Enable email confirmations" if you want email verification
+   - For development, you can disable email confirmation or check emails in the Supabase dashboard
+   - In development, confirmation emails are not sent by default - check Authentication > Users to manually confirm users
+4. Configure email templates (optional)
+5. Enable GitHub OAuth:
    - Add GitHub as a provider
    - Enter your GitHub OAuth app credentials
-   - Add callback URL: `https://yourdomain.com/auth/callback`
+   - Add callback URL: `https://yourdomain.com/en/auth/callback` (or `/ja/auth/callback` for Japanese)
 
 ## 2. GitHub OAuth App
 
@@ -59,17 +64,28 @@ The app requests:
 2. Complete business verification
 3. Get API keys from Dashboard
 
-### Create Products
+### Create Products and Prices
 1. Go to Products
 2. Create two products:
    - **Monthly Subscription** - $2.99/month recurring
+     - Product type: Service
+     - Pricing model: Recurring
+     - Price: $2.99 USD
+     - Billing period: Monthly
+     - **Copy the Price ID** (starts with `price_`) - you'll need this for `STRIPE_PRICE_ID_MONTHLY`
    - **Lifetime Access** - $14.99 one-time
+     - Product type: Service
+     - Pricing model: One-time
+     - Price: $14.99 USD
 
 ### Configure Webhooks
 1. Go to Developers > Webhooks
 2. Add endpoint: `https://yourdomain.com/api/webhooks/stripe`
 3. Select events:
    - `payment_intent.succeeded`
+   - `invoice.payment_succeeded`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
    - `customer.subscription.deleted`
 4. Note the webhook signing secret
 
@@ -87,6 +103,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
 STRIPE_SECRET_KEY=sk_live_xxx
 STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_PRICE_ID_MONTHLY=price_xxx
 
 # GitHub
 GITHUB_CLIENT_ID=xxx
@@ -177,6 +194,12 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 - Verify webhook endpoint is public
 - Check webhook secret matches
 - Review Stripe webhook logs
+
+### Email confirmation not working
+- **Development**: Emails are not sent by default. Manually confirm users in Supabase Dashboard > Authentication > Users
+- **Production**: Configure SMTP settings in Authentication > Settings > SMTP Settings
+- Check that email provider is enabled in Authentication > Providers
+- Verify `emailRedirectTo` URL includes correct locale prefix (e.g., `/en/auth/callback`)
 
 ### Grass graphs not showing
 - Verify data exists in database

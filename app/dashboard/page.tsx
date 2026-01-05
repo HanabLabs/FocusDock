@@ -17,35 +17,42 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single();
 
-  // Fetch GitHub commits (last 30 days)
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Calculate date 50 days ago
+  const fiftyDaysAgo = new Date();
+  fiftyDaysAgo.setDate(fiftyDaysAgo.getDate() - 50);
+  const fiftyDaysAgoString = fiftyDaysAgo.toISOString().split('T')[0];
 
-  const { data: githubCommits } = await supabase
-    .from('github_commits')
-    .select('*')
-    .eq('user_id', user.id)
-    .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
-    .order('date', { ascending: true });
+  // Fetch GitHub commits (last 50 days) - only if connected
+  let githubCommits = null;
+  if (profile?.github_connected) {
+    const { data: commits } = await supabase
+      .from('github_commits')
+      .select('*')
+      .eq('user_id', user.id)
+      .gte('date', fiftyDaysAgoString)
+      .order('date', { ascending: true });
+    
+    githubCommits = commits;
+  }
 
-  // Fetch work sessions (last 30 days)
+  // Fetch work sessions (last 50 days)
   const { data: workSessions } = await supabase
     .from('work_sessions')
     .select('*')
     .eq('user_id', user.id)
-    .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+    .gte('date', fiftyDaysAgoString)
     .order('date', { ascending: true });
 
-  // Fetch Spotify sessions (last 30 days) - only if paid
+  // Fetch Spotify sessions (last 50 days) - only if paid
   let spotifySessions = null;
   let spotifyArtists = null;
 
-  if (profile?.subscription_tier !== 'free') {
+  if (profile?.subscription_tier === 'monthly' || profile?.subscription_tier === 'lifetime') {
     const { data: sessions } = await supabase
       .from('spotify_sessions')
       .select('*')
       .eq('user_id', user.id)
-      .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+      .gte('date', fiftyDaysAgoString)
       .order('played_at', { ascending: true });
 
     spotifySessions = sessions;

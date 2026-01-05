@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useI18n } from '@/lib/i18n';
 import {
   PaymentElement,
   useStripe,
@@ -15,7 +15,7 @@ interface PaymentFormProps {
 }
 
 export function PaymentForm({ planType, amount }: PaymentFormProps) {
-  const t = useTranslations('pricing');
+  const { t } = useI18n();
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,24 +33,9 @@ export function PaymentForm({ planType, amount }: PaymentFormProps) {
     setError(null);
 
     try {
-      // Create payment intent
-      const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          planType,
-          amount: Math.round(amount * 100), // Convert to cents
-        }),
-      });
-
-      const { clientSecret } = await response.json();
-
-      // Confirm payment
+      // Confirm payment (clientSecret is already set in Elements)
       const { error: stripeError } = await stripe.confirmPayment({
         elements,
-        clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/payment/success`,
         },
@@ -58,12 +43,12 @@ export function PaymentForm({ planType, amount }: PaymentFormProps) {
 
       if (stripeError) {
         setError(stripeError.message || 'Payment failed');
+        setIsLoading(false);
       } else {
         setSuccess(true);
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -90,8 +75,8 @@ export function PaymentForm({ planType, amount }: PaymentFormProps) {
             />
           </svg>
         </div>
-        <h3 className="text-2xl font-bold mb-2">{t('thankYou')}</h3>
-        <p className="text-gray-400">{t('paymentSuccess')}</p>
+        <h3 className="text-2xl font-bold mb-2">{t('pricing.thankYou')}</h3>
+        <p className="text-gray-400">{t('pricing.paymentSuccess')}</p>
       </motion.div>
     );
   }

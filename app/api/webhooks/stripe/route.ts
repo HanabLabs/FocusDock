@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-02-24.acacia',
 });
 
 const supabaseAdmin = createClient(
@@ -40,23 +40,65 @@ export async function POST(request: NextRequest) {
         const userId = paymentIntent.metadata.supabase_user_id;
         const planType = paymentIntent.metadata.plan_type;
 
-        if (userId && planType !== 'donate') {
-          const subscriptionTier = planType === 'monthly' ? 'monthly' : 'lifetime';
+        // Only handle lifetime and donations (monthly subscriptions are handled by invoice.payment_succeeded)
+        if (userId && planType && planType !== 'donate' && planType !== 'monthly') {
+          if (planType === 'lifetime') {
+            // Check if user already has lifetime subscription
+            const { data: profile } = await supabaseAdmin
+              .from('user_profiles')
+              .select('subscription_tier')
+              .eq('id', userId)
+              .single();
 
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({ subscription_tier: subscriptionTier })
-            .eq('id', userId);
+            // Only update if not already lifetime (prevent overwriting)
+            if (profile && profile.subscription_tier !== 'lifetime') {
+              await supabaseAdmin
+                .from('user_profiles')
+                .update({ subscription_tier: 'lifetime' })
+                .eq('id', userId);
+            }
+          }
         }
 
         break;
       }
 
-      case 'customer.subscription.deleted': {
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string;
+
+        if (subscriptionId) {
+          // Get subscription to check metadata
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const userId = subscription.metadata.supabase_user_id;
+
+          if (userId) {
+            // Check if user already has lifetime subscription
+            const { data: profile } = await supabaseAdmin
+              .from('user_profiles')
+              .select('subscription_tier')
+              .eq('id', userId)
+              .single();
+
+            // Only update to monthly if not lifetime (lifetime takes priority)
+            if (profile && profile.subscription_tier !== 'lifetime') {
+              await supabaseAdmin
+                .from('user_profiles')
+                .update({ subscription_tier: 'monthly' })
+                .eq('id', userId);
+            }
+          }
+        }
+
+        break;
+      }
+
+      case 'customer.subscription.deleted':
+      case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        // Find user by customer ID and downgrade to free
+        // Find user by customer ID
         const { data: profile } = await supabaseAdmin
           .from('user_profiles')
           .select('id')
@@ -64,10 +106,22 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (profile) {
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({ subscription_tier: 'free' })
-            .eq('id', profile.id);
+          if (event.type === 'customer.subscription.deleted') {
+            // Subscription cancelled - downgrade to free
+            await supabaseAdmin
+              .from('user_profiles')
+              .update({ subscription_tier: 'free' })
+              .eq('id', profile.id);
+          } else if (subscription.status === 'active') {
+            // Subscription is active - ensure user has monthly tier
+            const userId = subscription.metadata.supabase_user_id;
+            if (userId) {
+              await supabaseAdmin
+                .from('user_profiles')
+                .update({ subscription_tier: 'monthly' })
+                .eq('id', userId);
+            }
+          }
         }
 
         break;

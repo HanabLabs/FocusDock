@@ -1,9 +1,8 @@
 import type { NextConfig } from 'next';
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
+  // @ts-ignore - devIndicators can be boolean in Next.js 15
+  devIndicators: false,
   images: {
     remotePatterns: [
       {
@@ -18,4 +17,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;

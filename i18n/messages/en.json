@@ -20,7 +20,10 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "loginWithGitHub": "Continue with GitHub",
-    "checkEmail": "Check your email for the login link"
+    "checkEmail": "Check your email for the login link",
+    "common": {
+      "loading": "Loading..."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -56,14 +59,16 @@
     "includeSquashCommits": "Include squash commits",
     "includeMergeCommits": "Include merge commits",
     "includeBotCommits": "Include bot commits",
-    "grassColors": "Grass Colors",
+    "grassColors": "Graph Colors",
     "commitColor": "Commit Color",
     "workHourColor": "Work Hour Color",
     "spotifyColor": "Spotify Color",
     "display": "Display",
     "showGitHub": "Show GitHub",
     "showWorkHours": "Show Work Hours",
-    "showSpotify": "Show Spotify"
+    "showSpotify": "Show Spotify",
+    "upgrade": "Upgrade",
+    "donate": "Donate"
   },
   "pricing": {
     "title": "Upgrade Your Experience",

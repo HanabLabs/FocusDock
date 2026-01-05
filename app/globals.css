@@ -70,3 +70,46 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* Shimmer animation for overflow blocks */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+/* Hide Next.js development badge */
+#__next-build-watcher,
+[data-nextjs-dialog],
+[data-nextjs-toast],
+body > div[style*="position: fixed"][style*="bottom"],
+body > div[style*="position: fixed"][style*="left"],
+body > div[style*="z-index: 9999"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+  width: 0;
+  height: 0;
+}
+
+.scrollbar-hide {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}

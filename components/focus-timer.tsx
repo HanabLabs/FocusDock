@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useI18n } from '@/lib/i18n';
 import { useFocusStore } from '@/lib/store/use-focus-store';
 
 function formatDuration(ms: number) {
@@ -18,7 +18,7 @@ function formatDuration(ms: number) {
 }
 
 export function FocusTimer() {
-  const t = useTranslations('focus');
+  const { t } = useI18n();
   const {
     state,
     sessionStartTime,
@@ -56,7 +56,7 @@ export function FocusTimer() {
       animate={{ opacity: 1, scale: 1 }}
       className="glass-card p-6"
     >
-      <h3 className="text-lg font-semibold mb-4">{t('focusMode')}</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('focus.focusMode')}</h3>
 
       <div className="flex flex-col items-center gap-4">
         {/* Timer Display */}
@@ -89,7 +89,7 @@ export function FocusTimer() {
               }
             />
             <p className="text-sm text-gray-400">
-              {state === 'active' ? t('statusActive') : t('statusPaused')}
+              {state === 'active' ? t('focus.statusActive') : t('focus.statusPaused')}
             </p>
           </div>
         )}
@@ -103,7 +103,7 @@ export function FocusTimer() {
               onClick={startFocus}
               className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold hover:shadow-glow transition-all duration-300"
             >
-              {t('startWork')}
+                {t('focus.startWork')}
             </motion.button>
           )}
 
@@ -115,7 +115,7 @@ export function FocusTimer() {
                 onClick={pauseFocus}
                 className="w-full py-3 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-semibold transition-all duration-300"
               >
-                {t('pauseWork')}
+                {t('focus.pauseWork')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -123,7 +123,7 @@ export function FocusTimer() {
                 onClick={endFocus}
                 className="w-full py-3 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-all duration-300"
               >
-                {t('endWork')}
+                {t('focus.endWork')}
               </motion.button>
             </>
           )}
@@ -136,7 +136,7 @@ export function FocusTimer() {
                 onClick={resumeFocus}
                 className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg font-semibold hover:shadow-glow transition-all duration-300"
               >
-                {t('resumeWork')}
+                {t('focus.resumeWork')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -144,7 +144,7 @@ export function FocusTimer() {
                 onClick={endFocus}
                 className="w-full py-3 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-all duration-300"
               >
-                {t('endWork')}
+                {t('focus.endWork')}
               </motion.button>
             </>
           )}
@@ -153,7 +153,7 @@ export function FocusTimer() {
         {/* Total Today */}
         {totalFocusToday > 0 && (
           <div className="text-sm text-gray-400 mt-2">
-            {t('totalToday', { duration: formatDuration(totalFocusToday) })}
+            {t('focus.totalToday').replace('{duration}', formatDuration(totalFocusToday))}
           </div>
         )}
       </div>
