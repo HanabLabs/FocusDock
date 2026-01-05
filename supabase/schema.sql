@@ -31,6 +31,17 @@ CREATE TABLE IF NOT EXISTS public.github_commits (
   UNIQUE(user_id, date, repository)
 );
 
+-- GitHub recent commits table (stores latest 5 commits with messages)
+CREATE TABLE IF NOT EXISTS public.github_recent_commits (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+  repository TEXT NOT NULL,
+  message TEXT NOT NULL,
+  date TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
+  UNIQUE(user_id, repository, message, date)
+);
+
 -- Work sessions table
 CREATE TABLE IF NOT EXISTS public.work_sessions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -62,6 +73,7 @@ CREATE INDEX IF NOT EXISTS idx_spotify_sessions_user_date ON public.spotify_sess
 -- Enable Row Level Security
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.github_commits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.github_recent_commits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.work_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.spotify_sessions ENABLE ROW LEVEL SECURITY;
 
