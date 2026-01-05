@@ -81,22 +81,47 @@ export async function POST(request: NextRequest) {
     // Fetch commits from each repository
     for (const repo of repos) {
       try {
-        // Fetch commits from the last 50 days
-        const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&author=${profile.github_username}&per_page=100`;
-        
-        const commitsResponse = await fetch(commitsUrl, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: 'application/vnd.github.v3+json',
-          },
-        });
+        // Fetch commits with pagination to get all commits from the last year
+        let allCommits: GitHubCommit[] = [];
+        let page = 1;
+        const perPage = 100;
+        let hasMore = true;
 
-        if (!commitsResponse.ok) {
-          console.error(`Failed to fetch commits for ${repo.full_name}:`, commitsResponse.statusText);
-          continue;
+        while (hasMore) {
+          const commitsUrl = `https://api.github.com/repos/${repo.full_name}/commits?since=${startDate.toISOString()}&author=${profile.github_username}&per_page=${perPage}&page=${page}`;
+          
+          const commitsResponse = await fetch(commitsUrl, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          });
+
+          if (!commitsResponse.ok) {
+            console.error(`Failed to fetch commits for ${repo.full_name}:`, commitsResponse.statusText);
+            break;
+          }
+
+          const commits: GitHubCommit[] = await commitsResponse.json();
+          
+          if (commits.length === 0) {
+            hasMore = false;
+          } else {
+            allCommits = allCommits.concat(commits);
+            
+            // Stop if we got less than perPage results (last page)
+            if (commits.length < perPage) {
+              hasMore = false;
+            } else {
+              page++;
+            }
+          }
+
+          // Rate limiting: wait a bit between pages
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
 
-        const commits: GitHubCommit[] = await commitsResponse.json();
+        const commits = allCommits;
 
         // Process commits and group by date
         const commitsByDate = new Map<string, {
