@@ -67,7 +67,8 @@ export async function GET(request: NextRequest) {
       },
     }).catch(err => console.error('Failed to trigger GitHub sync:', err));
 
-    return NextResponse.redirect(new URL('/dashboard?github=connected', request.url));
+    // Redirect with timestamp to force refresh
+    return NextResponse.redirect(new URL(`/dashboard?github=connected&t=${Date.now()}`, request.url));
   } catch (error) {
     console.error('GitHub OAuth error:', error);
     return NextResponse.redirect(new URL('/dashboard?error=github_failed', request.url));

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import Link from 'next/link';
 import { UserProfile } from '@/lib/types/database.types';
-import { createClient } from '@/lib/supabase/client';
 
 interface GitHubIntegrationClientProps {
   profile: UserProfile | null;
