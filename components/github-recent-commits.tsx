@@ -12,12 +12,13 @@ interface RecentCommit {
 }
 
 interface GitHubRecentCommitsProps {
-  locale: 'en' | 'ja';
+  locale?: 'en' | 'ja';
   label?: string;
 }
 
-export function GitHubRecentCommits({ locale, label }: GitHubRecentCommitsProps) {
-  const { t } = useI18n();
+export function GitHubRecentCommits({ locale: propLocale, label }: GitHubRecentCommitsProps) {
+  const { t, locale: i18nLocale } = useI18n();
+  const locale = propLocale || i18nLocale;
   const [commits, setCommits] = useState<RecentCommit[]>([]);
   const [loading, setLoading] = useState(true);
 

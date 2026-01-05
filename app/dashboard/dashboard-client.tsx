@@ -250,7 +250,7 @@ export function DashboardClient({
                   transition={{ delay: 0.4 }}
                   className="glass-card p-4"
                 >
-                  <GitHubRecentCommits />
+                  <GitHubRecentCommits locale={locale} />
                 </motion.div>
               )}
 
