@@ -26,13 +26,23 @@ export async function POST(request: NextRequest) {
     // Calculate date from startedAt
     const date = new Date(startedAt).toISOString().split('T')[0];
 
+    // Round duration, but ensure minimum of 1 minute if duration > 0
+    // This prevents very short sessions (e.g., 0.4 minutes) from being rounded to 0
+    const roundedDuration = Math.round(durationMinutes);
+    const finalDuration = roundedDuration === 0 && durationMinutes > 0 ? 1 : roundedDuration;
+
+    // Don't save sessions with 0 duration
+    if (finalDuration <= 0) {
+      return NextResponse.json({ success: true, skipped: true, reason: 'Duration is 0' });
+    }
+
     // Insert work session
     const { error: insertError } = await supabase
       .from('work_sessions')
       .insert({
         user_id: user.id,
         date,
-        duration_minutes: Math.round(durationMinutes),
+        duration_minutes: finalDuration,
         started_at: new Date(startedAt).toISOString(),
         ended_at: new Date(endedAt).toISOString(),
       });
