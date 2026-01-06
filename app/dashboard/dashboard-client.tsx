@@ -99,13 +99,18 @@ export function DashboardClient({
     const todayBlocks = todayMinutes / unitMinutes;
     
     const data = workSessions.reduce((acc, session) => {
-      const existing = acc.find((d: any) => d.date === session.date);
+      // Ensure date is in YYYY-MM-DD format (handle both DATE and TIMESTAMP)
+      const sessionDate = typeof session.date === 'string' 
+        ? session.date.split('T')[0] 
+        : session.date;
+      
+      const existing = acc.find((d: any) => d.date === sessionDate);
       // Convert minutes to blocks based on selected unit
       const blocks = session.duration_minutes / unitMinutes;
       if (existing) {
         existing.value += blocks;
       } else {
-        acc.push({ date: session.date, value: blocks });
+        acc.push({ date: sessionDate, value: blocks });
       }
       return acc;
     }, [] as { date: string; value: number }[]);
@@ -118,6 +123,9 @@ export function DashboardClient({
     } else if (todayBlocks > 0) {
       data.push({ date: today, value: todayBlocks });
     }
+    
+    console.log('Work sessions from DB:', workSessions);
+    console.log('Processed work data:', data);
     
     return data;
   }, [workSessions, workHoursBlockUnit, totalFocusToday]);
