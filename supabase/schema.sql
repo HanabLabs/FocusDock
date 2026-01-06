@@ -9,9 +9,11 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
   github_connected BOOLEAN DEFAULT FALSE,
   github_username TEXT,
   github_access_token TEXT,
+  github_last_synced_at TIMESTAMP WITH TIME ZONE,
   spotify_connected BOOLEAN DEFAULT FALSE,
   spotify_access_token TEXT,
   spotify_refresh_token TEXT,
+  spotify_last_synced_at TIMESTAMP WITH TIME ZONE,
   stripe_customer_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL

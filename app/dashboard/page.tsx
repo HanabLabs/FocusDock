@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { DashboardClient } from './dashboard-client';
+import { headers } from 'next/headers';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const headersList = await headers();
 
   if (!user) {
     redirect('/auth/login');
@@ -16,6 +18,48 @@ export default async function DashboardPage() {
     .select('*')
     .eq('id', user.id)
     .single();
+
+  // Auto-sync GitHub if connected and last sync was more than 6 hours ago (or never synced)
+  if (profile?.github_connected) {
+    const lastSynced = profile.github_last_synced_at 
+      ? new Date(profile.github_last_synced_at).getTime()
+      : 0;
+    const sixHoursAgo = Date.now() - (6 * 60 * 60 * 1000);
+    
+    if (lastSynced < sixHoursAgo) {
+      // Trigger sync in background (don't wait for it)
+      // Pass cookies from current request to maintain authentication
+      const cookieHeader = headersList.get('cookie') || '';
+      const syncUrl = new URL('/api/sync/github', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+      fetch(syncUrl.toString(), {
+        method: 'POST',
+        headers: {
+          'Cookie': cookieHeader,
+        },
+      }).catch(err => console.error('Failed to trigger GitHub sync:', err));
+    }
+  }
+
+  // Auto-sync Spotify if connected and last sync was more than 6 hours ago (or never synced)
+  if (profile?.spotify_connected && (profile?.subscription_tier === 'monthly' || profile?.subscription_tier === 'lifetime')) {
+    const lastSynced = profile.spotify_last_synced_at 
+      ? new Date(profile.spotify_last_synced_at).getTime()
+      : 0;
+    const sixHoursAgo = Date.now() - (6 * 60 * 60 * 1000);
+    
+    if (lastSynced < sixHoursAgo) {
+      // Trigger sync in background (don't wait for it)
+      // Pass cookies from current request to maintain authentication
+      const cookieHeader = headersList.get('cookie') || '';
+      const syncUrl = new URL('/api/sync/spotify', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+      fetch(syncUrl.toString(), {
+        method: 'POST',
+        headers: {
+          'Cookie': cookieHeader,
+        },
+      }).catch(err => console.error('Failed to trigger Spotify sync:', err));
+    }
+  }
 
   // Calculate date 50 days ago
   const fiftyDaysAgo = new Date();

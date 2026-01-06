@@ -268,6 +268,12 @@ export async function POST(request: NextRequest) {
       console.log('No recent commits to insert');
     }
 
+    // Update last synced timestamp
+    await supabase
+      .from('user_profiles')
+      .update({ github_last_synced_at: new Date().toISOString() })
+      .eq('id', user.id);
+
     return NextResponse.json({
       success: true,
       commitsSynced: commitsToInsert.length,

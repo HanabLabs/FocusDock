@@ -209,6 +209,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Update last synced timestamp
+    await supabase
+      .from('user_profiles')
+      .update({ spotify_last_synced_at: new Date().toISOString() })
+      .eq('id', user.id);
+
     return NextResponse.json({
       success: true,
       sessionsSynced: sessionsToInsert.length,
