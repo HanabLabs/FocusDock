@@ -21,12 +21,10 @@ export default async function DashboardPage() {
 
   // Auto-sync GitHub if connected and last sync was more than 5 minutes ago (or never synced)
   if (profile?.github_connected) {
-    const lastSynced = profile.github_last_synced_at 
-      ? new Date(profile.github_last_synced_at).getTime()
-      : 0;
-    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    const shouldSync = !profile.github_last_synced_at || 
+      (new Date(profile.github_last_synced_at).getTime() < Date.now() - (5 * 60 * 1000));
     
-    if (lastSynced < fiveMinutesAgo) {
+    if (shouldSync) {
       // Trigger sync in background (don't wait for it)
       // Pass cookies from current request to maintain authentication
       const cookieHeader = headersList.get('cookie') || '';
@@ -42,12 +40,10 @@ export default async function DashboardPage() {
 
   // Auto-sync Spotify if connected and last sync was more than 5 minutes ago (or never synced)
   if (profile?.spotify_connected && (profile?.subscription_tier === 'monthly' || profile?.subscription_tier === 'lifetime')) {
-    const lastSynced = profile.spotify_last_synced_at 
-      ? new Date(profile.spotify_last_synced_at).getTime()
-      : 0;
-    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    const shouldSync = !profile.spotify_last_synced_at || 
+      (new Date(profile.spotify_last_synced_at).getTime() < Date.now() - (5 * 60 * 1000));
     
-    if (lastSynced < fiveMinutesAgo) {
+    if (shouldSync) {
       // Trigger sync in background (don't wait for it)
       // Pass cookies from current request to maintain authentication
       const cookieHeader = headersList.get('cookie') || '';
