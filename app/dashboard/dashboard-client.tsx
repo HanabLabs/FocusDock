@@ -98,22 +98,24 @@ export function DashboardClient({
     const todayMinutes = totalFocusToday / (1000 * 60);
     const todayBlocks = todayMinutes / unitMinutes;
     
-    const data = workSessions.reduce((acc, session) => {
+    // Group work sessions by date and sum duration_minutes
+    const sessionsByDate = new Map<string, number>();
+    
+    workSessions.forEach((session) => {
       // Ensure date is in YYYY-MM-DD format (handle both DATE and TIMESTAMP)
       const sessionDate = typeof session.date === 'string' 
         ? session.date.split('T')[0] 
         : session.date;
       
-      const existing = acc.find((d: any) => d.date === sessionDate);
-      // Convert minutes to blocks based on selected unit
-      const blocks = session.duration_minutes / unitMinutes;
-      if (existing) {
-        existing.value += blocks;
-      } else {
-        acc.push({ date: sessionDate, value: blocks });
-      }
-      return acc;
-    }, [] as { date: string; value: number }[]);
+      const currentMinutes = sessionsByDate.get(sessionDate) || 0;
+      sessionsByDate.set(sessionDate, currentMinutes + session.duration_minutes);
+    });
+    
+    // Convert to array format with blocks
+    const data = Array.from(sessionsByDate.entries()).map(([date, totalMinutes]) => ({
+      date,
+      value: totalMinutes / unitMinutes, // Convert to blocks
+    }));
     
     // Add or update today's data with stored focus timer data
     const existingToday = data.find((d: any) => d.date === today);
@@ -125,6 +127,7 @@ export function DashboardClient({
     }
     
     console.log('Work sessions from DB:', workSessions);
+    console.log('Sessions grouped by date:', Array.from(sessionsByDate.entries()));
     console.log('Processed work data:', data);
     
     return data;
