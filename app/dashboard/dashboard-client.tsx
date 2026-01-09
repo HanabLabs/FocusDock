@@ -290,6 +290,7 @@ export function DashboardClient({
                       color={commitColor}
                       label={t('dashboard.github')}
                       type="commits"
+                      locale={locale}
                     />
                   ) : (
                     <div className="text-center py-8">
@@ -318,6 +319,7 @@ export function DashboardClient({
                     color={workHourColor}
                     label={t('dashboard.workHours')}
                     type="hours"
+                    locale={locale}
                   />
                 </motion.div>
               )}
@@ -337,6 +339,7 @@ export function DashboardClient({
                         color={spotifyColor}
                         label={t('dashboard.spotify')}
                         type="spotify"
+                        locale={locale}
                       />
                     ) : (
                       <div className="text-center py-8">
