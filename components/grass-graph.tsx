@@ -21,7 +21,6 @@ interface GrassGraphProps {
 
 export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGraphProps) {
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
 
   // Memoize days array (50 days)
   const days = useMemo(() => {
@@ -52,21 +51,27 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
     return { blocks, overflow };
   };
 
-  // Format tooltip content based on type
-  const formatTooltipValue = (value: number) => {
+  // Format value based on type
+  const formatValue = (value: number) => {
     const roundedValue = Math.round(value);
     if (type === 'commits') {
-      return `${roundedValue} ${roundedValue === 1 ? 'commit' : 'commits'}`;
+      return locale === 'ja'
+        ? `${roundedValue}コミット`
+        : `${roundedValue} ${roundedValue === 1 ? 'commit' : 'commits'}`;
     } else if (type === 'hours') {
-      return `${roundedValue} ${roundedValue === 1 ? 'hour' : 'hours'}`;
+      return locale === 'ja'
+        ? `${roundedValue}時間`
+        : `${roundedValue} ${roundedValue === 1 ? 'hour' : 'hours'}`;
     } else {
       // spotify
-      return `${roundedValue} ${roundedValue === 1 ? 'block' : 'blocks'}`;
+      return locale === 'ja'
+        ? `${roundedValue}ブロック`
+        : `${roundedValue} ${roundedValue === 1 ? 'block' : 'blocks'}`;
     }
   };
 
-  // Format date for tooltip
-  const formatTooltipDate = (dateStr: string) => {
+  // Format date for display
+  const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     if (locale === 'ja') {
       return format(date, 'M月d日 (E)', { locale: ja });
@@ -74,33 +79,20 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
     return format(date, 'MMM d, E');
   };
 
-  const handleMouseEnter = (day: string, event: React.MouseEvent) => {
-    setHoveredDay(day);
-    // Position tooltip at cursor position (right and slightly up)
-    setTooltipPos({
-      x: event.clientX + 12, // 12px to the right of cursor
-      y: event.clientY - 12, // 12px above cursor
-    });
-  };
-
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (hoveredDay) {
-      // Update tooltip position as mouse moves
-      setTooltipPos({
-        x: event.clientX + 12,
-        y: event.clientY - 12,
-      });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredDay(null);
-    setTooltipPos(null);
-  };
-
   return (
     <div className="w-full">
-      <h3 className="text-sm font-medium text-gray-400 mb-4">{label}</h3>
+      {/* Header with label and hover info */}
+      <div className="flex items-center justify-between mb-4 min-h-[20px]">
+        <h3 className="text-sm font-medium text-gray-400">{label}</h3>
+        {hoveredDay && (
+          <div className="text-xs text-gray-300 flex items-center gap-2 animate-in fade-in duration-150">
+            <span className="font-semibold">{formatDate(hoveredDay)}</span>
+            <span className="text-gray-400">·</span>
+            <span>{formatValue(getValueForDay(hoveredDay))}</span>
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-center">
         <div className="flex gap-[2px] overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           {days.map((day) => {
@@ -111,9 +103,8 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
               <div
                 key={day}
                 className="flex flex-col-reverse gap-[2px] min-w-[12px] h-[110px] relative group"
-                onMouseEnter={(e) => handleMouseEnter(day, e)}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
+                onMouseEnter={() => setHoveredDay(day)}
+                onMouseLeave={() => setHoveredDay(null)}
               >
                 {/* Blocks */}
                 {Array.from({ length: MAX_BLOCKS }).map((_, blockIndex) => {
@@ -147,24 +138,6 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
           })}
         </div>
       </div>
-
-      {/* Tooltip */}
-      {hoveredDay && tooltipPos && (
-        <div
-          className="fixed z-[9999] pointer-events-none"
-          style={{
-            left: `${tooltipPos.x}px`,
-            top: `${tooltipPos.y}px`,
-          }}
-        >
-          <div className="glass rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-lg border border-white/20">
-            <div className="font-semibold">{formatTooltipDate(hoveredDay)}</div>
-            <div className="text-gray-300 mt-0.5">
-              {formatTooltipValue(getValueForDay(hoveredDay))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
