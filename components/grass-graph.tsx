@@ -17,9 +17,10 @@ interface GrassGraphProps {
   label: string;
   type: 'commits' | 'hours' | 'spotify';
   locale?: string;
+  blockUnit?: '15min' | '30min' | '1hour'; // For hours and spotify types
 }
 
-export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGraphProps) {
+export function GrassGraph({ data, color, label, type, locale = 'en', blockUnit = '1hour' }: GrassGraphProps) {
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
 
   // Memoize days array (50 days)
@@ -54,19 +55,73 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
   // Format value based on type
   const formatValue = (value: number) => {
     const roundedValue = Math.round(value);
+
     if (type === 'commits') {
       return locale === 'ja'
         ? `${roundedValue}コミット`
         : `${roundedValue} ${roundedValue === 1 ? 'commit' : 'commits'}`;
     } else if (type === 'hours') {
-      return locale === 'ja'
-        ? `${roundedValue}時間`
-        : `${roundedValue} ${roundedValue === 1 ? 'hour' : 'hours'}`;
+      // Convert blocks to actual time based on blockUnit
+      let minutes = 0;
+      if (blockUnit === '15min') {
+        minutes = roundedValue * 15;
+      } else if (blockUnit === '30min') {
+        minutes = roundedValue * 30;
+      } else {
+        minutes = roundedValue * 60;
+      }
+
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+
+      if (locale === 'ja') {
+        if (hours > 0 && remainingMinutes > 0) {
+          return `${hours}時間${remainingMinutes}分`;
+        } else if (hours > 0) {
+          return `${hours}時間`;
+        } else {
+          return `${remainingMinutes}分`;
+        }
+      } else {
+        if (hours > 0 && remainingMinutes > 0) {
+          return `${hours}h ${remainingMinutes}m`;
+        } else if (hours > 0) {
+          return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+        } else {
+          return `${remainingMinutes} min`;
+        }
+      }
     } else {
-      // spotify
-      return locale === 'ja'
-        ? `${roundedValue}ブロック`
-        : `${roundedValue} ${roundedValue === 1 ? 'block' : 'blocks'}`;
+      // spotify - also use blockUnit
+      let minutes = 0;
+      if (blockUnit === '15min') {
+        minutes = roundedValue * 15;
+      } else if (blockUnit === '30min') {
+        minutes = roundedValue * 30;
+      } else {
+        minutes = roundedValue * 60;
+      }
+
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+
+      if (locale === 'ja') {
+        if (hours > 0 && remainingMinutes > 0) {
+          return `${hours}時間${remainingMinutes}分`;
+        } else if (hours > 0) {
+          return `${hours}時間`;
+        } else {
+          return `${remainingMinutes}分`;
+        }
+      } else {
+        if (hours > 0 && remainingMinutes > 0) {
+          return `${hours}h ${remainingMinutes}m`;
+        } else if (hours > 0) {
+          return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+        } else {
+          return `${remainingMinutes} min`;
+        }
+      }
     }
   };
 

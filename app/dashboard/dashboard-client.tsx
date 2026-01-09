@@ -320,6 +320,7 @@ export function DashboardClient({
                     label={t('dashboard.workHours')}
                     type="hours"
                     locale={locale}
+                    blockUnit={workHoursBlockUnit}
                   />
                 </motion.div>
               )}
@@ -340,6 +341,7 @@ export function DashboardClient({
                         label={t('dashboard.spotify')}
                         type="spotify"
                         locale={locale}
+                        blockUnit={spotifyBlockUnit}
                       />
                     ) : (
                       <div className="text-center py-8">
