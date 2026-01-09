@@ -100,6 +100,10 @@ CREATE POLICY "Users can insert their own commits"
   ON public.github_commits FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+CREATE POLICY "Users can delete their own commits"
+  ON public.github_commits FOR DELETE
+  USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can view their own recent commits"
   ON public.github_recent_commits FOR SELECT
   USING (auth.uid() = user_id);
