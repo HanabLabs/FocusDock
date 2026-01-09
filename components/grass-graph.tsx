@@ -76,11 +76,21 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
 
   const handleMouseEnter = (day: string, event: React.MouseEvent) => {
     setHoveredDay(day);
-    const rect = event.currentTarget.getBoundingClientRect();
+    // Position tooltip at cursor position (right and slightly up)
     setTooltipPos({
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10,
+      x: event.clientX + 12, // 12px to the right of cursor
+      y: event.clientY - 12, // 12px above cursor
     });
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (hoveredDay) {
+      // Update tooltip position as mouse moves
+      setTooltipPos({
+        x: event.clientX + 12,
+        y: event.clientY - 12,
+      });
+    }
   };
 
   const handleMouseLeave = () => {
@@ -102,6 +112,7 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
                 key={day}
                 className="flex flex-col-reverse gap-[2px] min-w-[12px] h-[110px] relative group"
                 onMouseEnter={(e) => handleMouseEnter(day, e)}
+                onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
                 {/* Blocks */}
@@ -140,11 +151,10 @@ export function GrassGraph({ data, color, label, type, locale = 'en' }: GrassGra
       {/* Tooltip */}
       {hoveredDay && tooltipPos && (
         <div
-          className="fixed z-50 pointer-events-none"
+          className="fixed z-[9999] pointer-events-none"
           style={{
             left: `${tooltipPos.x}px`,
             top: `${tooltipPos.y}px`,
-            transform: 'translate(-50%, -100%)',
           }}
         >
           <div className="glass rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-lg border border-white/20">
