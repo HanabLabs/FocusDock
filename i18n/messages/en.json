@@ -28,6 +28,9 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
+    "description": "Track your development journey",
+    "settings": "Settings",
+    "github": "GitHub Commits",
     "githubCommits": "GitHub Commits",
     "workHours": "Work Hours",
     "spotify": "Spotify",
@@ -38,7 +41,16 @@
     "noData": "No data available",
     "connectGitHub": "Connect GitHub",
     "connectSpotify": "Connect Spotify",
-    "upgradeForSpotify": "Upgrade to access Spotify features"
+    "connect": "Connect",
+    "spotifyPremiumRequired": "Upgrade to access Spotify features",
+    "upgrade": "Upgrade",
+    "upgradeForSpotify": "Upgrade to access Spotify features",
+    "syncButton": "Sync",
+    "syncing": "Syncing...",
+    "lastSynced": "Last synced: {time}",
+    "syncSuccess": "Sync completed",
+    "syncError": "Sync failed",
+    "neverSynced": "Never synced"
   },
   "grass": {
     "commits": "{count} {count, plural, =1 {commit} other {commits}}",

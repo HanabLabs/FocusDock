@@ -45,12 +45,62 @@ export function DashboardClient({
     spotifyBlockUnit,
   } = useSettingsStore();
   const { totalFocusToday } = useFocusStore();
-  
+
   const [isMounted, setIsMounted] = useState(false);
-  
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Handle manual GitHub sync
+  const handleGitHubSync = async () => {
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    setSyncMessage(null);
+
+    try {
+      const response = await fetch('/api/sync/github', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        setSyncMessage({ type: 'success', text: t('dashboard.syncSuccess') });
+        // Reload page to fetch fresh data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        setSyncMessage({ type: 'error', text: t('dashboard.syncError') });
+        setIsSyncing(false);
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      setSyncMessage({ type: 'error', text: t('dashboard.syncError') });
+      setIsSyncing(false);
+    }
+  };
+
+  // Format last synced time
+  const formatLastSynced = (timestamp: string | null) => {
+    if (!timestamp) return t('dashboard.neverSynced');
+
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+  };
 
   // Handle GitHub connection success - reload page to fetch new data
   useEffect(() => {
@@ -90,33 +140,33 @@ export function DashboardClient({
   const workData = useMemo(() => {
     // Convert block unit to minutes
     const unitMinutes = workHoursBlockUnit === '15min' ? 15 : workHoursBlockUnit === '30min' ? 30 : 60;
-    
+
     // Get today's date string (YYYY-MM-DD)
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Use stored totalFocusToday (doesn't include active session time for graph stability)
     const todayMinutes = totalFocusToday / (1000 * 60);
     const todayBlocks = todayMinutes / unitMinutes;
-    
+
     // Group work sessions by date and sum duration_minutes
     const sessionsByDate = new Map<string, number>();
-    
+
     workSessions.forEach((session) => {
       // Ensure date is in YYYY-MM-DD format (handle both DATE and TIMESTAMP)
-      const sessionDate = typeof session.date === 'string' 
-        ? session.date.split('T')[0] 
+      const sessionDate = typeof session.date === 'string'
+        ? session.date.split('T')[0]
         : session.date;
-      
+
       const currentMinutes = sessionsByDate.get(sessionDate) || 0;
       sessionsByDate.set(sessionDate, currentMinutes + session.duration_minutes);
     });
-    
+
     // Convert to array format with blocks
     const data = Array.from(sessionsByDate.entries()).map(([date, totalMinutes]) => ({
       date,
       value: totalMinutes / unitMinutes, // Convert to blocks
     }));
-    
+
     // Add or update today's data with stored focus timer data
     const existingToday = data.find((d: any) => d.date === today);
     if (existingToday) {
@@ -125,11 +175,11 @@ export function DashboardClient({
     } else if (todayBlocks > 0) {
       data.push({ date: today, value: todayBlocks });
     }
-    
+
     console.log('Work sessions from DB:', workSessions);
     console.log('Sessions grouped by date:', Array.from(sessionsByDate.entries()));
     console.log('Processed work data:', data);
-    
+
     return data;
   }, [workSessions, workHoursBlockUnit, totalFocusToday]);
 
@@ -138,7 +188,7 @@ export function DashboardClient({
   const spotifyData = useMemo(() => {
     // Convert block unit to milliseconds
     const unitMs = spotifyBlockUnit === '15min' ? 15 * 60 * 1000 : spotifyBlockUnit === '30min' ? 30 * 60 * 1000 : 60 * 60 * 1000;
-    
+
     return spotifySessions.reduce((acc, session) => {
       const existing = acc.find((d: any) => d.date === session.date);
       // Convert ms to blocks based on selected unit (with decimal precision)
@@ -159,12 +209,39 @@ export function DashboardClient({
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold mb-2 text-gradient">{t('dashboard.title')}</h1>
               <p className="text-gray-400">{t('dashboard.description')}</p>
             </div>
             <div className="flex items-center gap-4">
+              {/* GitHub Sync Button - only show if GitHub is connected */}
+              {profile?.github_connected && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleGitHubSync}
+                  disabled={isSyncing}
+                  className="glass glass-hover px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSyncing ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {t('dashboard.syncing')}
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      {t('dashboard.syncButton')}
+                    </>
+                  )}
+                </motion.button>
+              )}
               <Link
                 href="/settings"
                 className="glass glass-hover px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
@@ -173,6 +250,25 @@ export function DashboardClient({
               </Link>
             </div>
           </div>
+
+          {/* Sync Status Messages */}
+          {syncMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`glass rounded-lg px-4 py-2 text-sm mb-4 ${syncMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'
+                }`}
+            >
+              {syncMessage.text}
+            </motion.div>
+          )}
+
+          {/* Last Synced Time - only show if GitHub is connected */}
+          {profile?.github_connected && (
+            <div className="text-xs text-gray-500">
+              {t('dashboard.lastSynced').replace('{time}', formatLastSynced(profile.github_last_synced_at))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

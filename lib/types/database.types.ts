@@ -7,9 +7,11 @@ export interface UserProfile {
   github_connected: boolean;
   github_username: string | null;
   github_access_token: string | null;
+  github_last_synced_at: string | null;
   spotify_connected: boolean;
   spotify_access_token: string | null;
   spotify_refresh_token: string | null;
+  spotify_last_synced_at: string | null;
   stripe_customer_id: string | null;
   created_at: string;
   updated_at: string;

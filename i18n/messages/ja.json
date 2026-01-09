@@ -38,7 +38,13 @@
     "noData": "データがありません",
     "connectGitHub": "GitHubを連携",
     "connectSpotify": "Spotifyを連携",
-    "upgradeForSpotify": "Spotify機能を利用するにはアップグレードしてください"
+    "upgradeForSpotify": "Spotify機能を利用するにはアップグレードしてください",
+    "syncButton": "同期",
+    "syncing": "同期中...",
+    "lastSynced": "最終同期: {time}",
+    "syncSuccess": "同期が完了しました",
+    "syncError": "同期に失敗しました",
+    "neverSynced": "未同期"
   },
   "grass": {
     "commits": "{count}コミット",
